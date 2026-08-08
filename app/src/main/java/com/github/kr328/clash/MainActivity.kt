@@ -22,6 +22,8 @@ import com.github.kr328.clash.util.stopClashService
 import com.github.kr328.clash.util.withClash
 import com.github.kr328.clash.util.withProfile
 import com.github.kr328.clash.core.bridge.*
+import com.github.kr328.clash.core.Clash
+import com.github.kr328.clash.core.model.TunnelState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.selects.select
@@ -77,6 +79,12 @@ class MainActivity : BaseActivity<MainDesign>() {
                             startActivity(HelpActivity::class.intent)
                         MainDesign.Request.OpenAbout ->
                             design.showAbout(queryAppVersionName())
+                        MainDesign.Request.PatchModeDirect ->
+                            design.patchMode(TunnelState.Mode.Direct)
+                        MainDesign.Request.PatchModeGlobal ->
+                            design.patchMode(TunnelState.Mode.Global)
+                        MainDesign.Request.PatchModeRule ->
+                            design.patchMode(TunnelState.Mode.Rule)
                     }
                 }
                 if (clashRunning) {
@@ -110,6 +118,20 @@ class MainActivity : BaseActivity<MainDesign>() {
         withClash {
             setForwarded(queryTrafficTotal())
         }
+    }
+
+    private suspend fun MainDesign.patchMode(mode: TunnelState.Mode) {
+        showModeSwitchTips()
+
+        withClash {
+            val override = queryOverride(Clash.OverrideSlot.Session)
+
+            override.mode = mode
+
+            patchOverride(Clash.OverrideSlot.Session, override)
+        }
+
+        setMode(mode)
     }
 
     private suspend fun MainDesign.startClash() {

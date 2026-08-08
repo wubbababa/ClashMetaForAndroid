@@ -2,6 +2,7 @@ package com.github.kr328.clash.design
 
 import android.content.Context
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.github.kr328.clash.core.model.TunnelState
 import com.github.kr328.clash.core.util.trafficTotal
@@ -23,6 +24,9 @@ class MainDesign(context: Context) : Design<MainDesign.Request>(context) {
         OpenSettings,
         OpenHelp,
         OpenAbout,
+        PatchModeDirect,
+        PatchModeGlobal,
+        PatchModeRule,
     }
 
     private val binding = DesignMainBinding
@@ -57,6 +61,16 @@ class MainDesign(context: Context) : Design<MainDesign.Request>(context) {
                 TunnelState.Mode.Rule -> context.getString(R.string.rule_mode)
                 else -> context.getString(R.string.rule_mode)
             }
+
+            binding.modeDirectView.isChecked = mode == TunnelState.Mode.Direct
+            binding.modeGlobalView.isChecked = mode == TunnelState.Mode.Global
+            binding.modeRuleView.isChecked = mode == TunnelState.Mode.Rule
+        }
+    }
+
+    suspend fun showModeSwitchTips() {
+        withContext(Dispatchers.Main) {
+            Toast.makeText(context, R.string.mode_switch_tips, Toast.LENGTH_LONG).show()
         }
     }
 
