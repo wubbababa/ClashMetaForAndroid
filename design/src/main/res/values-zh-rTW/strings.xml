@@ -59,6 +59,11 @@
     <string name="recently">最近</string>
     <string name="route_system_traffic">自動轉送作業系統流量</string>
     <string name="routing_via_vpn_service">通過 VpnService 自動轉送所有作業系統流量</string>
+    <string name="firewall">防火牆</string>
+    <string name="firewall_mode">白名單模式</string>
+    <string name="firewall_mode_summary">只允許白名單中的應用上網，其餘應用將被斷網</string>
+    <string name="firewall_whitelist">上網白名單</string>
+    <string name="firewall_whitelist_summary">選擇允許上網的應用</string>
     <string name="rule_mode">規則模式</string>
     <string name="running">執行中</string>
     <string name="settings">設定</string>

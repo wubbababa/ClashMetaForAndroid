@@ -36,6 +36,16 @@ class ServiceStore(context: Context) {
         defaultValue = emptySet()
     )
 
+    var firewallEnabled: Boolean by store.boolean(
+        key = "firewall_enabled",
+        defaultValue = false
+    )
+
+    var firewallWhitelistPackages by store.stringSet(
+        key = "firewall_whitelist_packages",
+        defaultValue = emptySet()
+    )
+
     var dnsHijacking by store.boolean(
         key = "dns_hijacking",
         defaultValue = true

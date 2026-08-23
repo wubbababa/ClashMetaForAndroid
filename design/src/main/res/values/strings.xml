@@ -130,6 +130,12 @@
     <string name="route_system_traffic">Route System Traffic</string>
     <string name="routing_via_vpn_service">Auto routing all system traffic via VpnService</string>
 
+    <string name="firewall">Firewall</string>
+    <string name="firewall_mode">Whitelist Mode</string>
+    <string name="firewall_mode_summary">Only whitelisted apps can access the internet, all other apps will be blocked</string>
+    <string name="firewall_whitelist">Internet Access Whitelist</string>
+    <string name="firewall_whitelist_summary">Select apps allowed to access the internet</string>
+
     <string name="vpn_service_options">VpnService Options</string>
     <string name="bypass_private_network">Bypass Private Network</string>
     <string name="bypass_private_network_summary">Bypass private network addresses</string>

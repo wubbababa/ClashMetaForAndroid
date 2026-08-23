@@ -30,6 +30,8 @@ class NetworkSettingsActivity : BaseActivity<NetworkSettingsDesign>() {
                     when (it) {
                         NetworkSettingsDesign.Request.StartAccessControlList ->
                             startActivity(AccessControlActivity::class.intent)
+                        NetworkSettingsDesign.Request.StartFirewallWhitelist ->
+                            startActivity(FirewallWhitelistActivity::class.intent)
                     }
                 }
             }

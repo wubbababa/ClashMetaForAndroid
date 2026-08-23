@@ -22,7 +22,8 @@ class NetworkSettingsDesign(
     running: Boolean,
 ) : Design<NetworkSettingsDesign.Request>(context) {
     enum class Request {
-        StartAccessControlList
+        StartAccessControlList,
+        StartFirewallWhitelist
     }
 
     private val binding = DesignSettingsCommonBinding
@@ -51,6 +52,24 @@ class NetworkSettingsDesign(
                     vpnDependencies.forEach {
                         it.enabled = uiStore.enableVpn
                     }
+                }
+            }
+
+            category(R.string.firewall)
+
+            switch(
+                value = srvStore::firewallEnabled,
+                title = R.string.firewall_mode,
+                summary = R.string.firewall_mode_summary,
+                configure = vpnDependencies::add,
+            )
+
+            clickable(
+                title = R.string.firewall_whitelist,
+                summary = R.string.firewall_whitelist_summary,
+            ) {
+                clicked {
+                    requests.trySend(Request.StartFirewallWhitelist)
                 }
             }
 

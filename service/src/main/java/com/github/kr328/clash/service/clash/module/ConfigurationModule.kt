@@ -5,6 +5,7 @@ import com.github.kr328.clash.common.constants.Intents
 import com.github.kr328.clash.common.log.Log
 import com.github.kr328.clash.core.Clash
 import com.github.kr328.clash.service.StatusProvider
+import com.github.kr328.clash.service.clash.FirewallProcessor
 import com.github.kr328.clash.service.data.ImportedDao
 import com.github.kr328.clash.service.data.SelectionDao
 import com.github.kr328.clash.service.store.ServiceStore
@@ -57,7 +58,17 @@ class ConfigurationModule(service: Service) : Module<ConfigurationModule.LoadExc
 
                 Clash.setAgeSecretKey(active.ageSecretKey?.takeIf { it.isNotBlank() })
 
-                Clash.load(service.importedDir.resolve(active.uuid.toString())).await()
+                val loadDir = if (store.firewallEnabled)
+                    FirewallProcessor.process(
+                        service,
+                        current,
+                        store.firewallWhitelistPackages,
+                        service.packageName,
+                    )
+                else
+                    service.importedDir.resolve(current.toString())
+
+                Clash.load(loadDir).await()
 
                 val remove = SelectionDao().querySelections(active.uuid)
                     .filterNot { Clash.patchSelector(it.proxy, it.selected) }

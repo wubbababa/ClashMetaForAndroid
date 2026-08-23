@@ -123,10 +123,17 @@ class TunService : VpnService(), CoroutineScope by CoroutineScope(Dispatchers.De
     private fun TunModule.open() {
         val store = ServiceStore(self)
 
+        // Firewall mode: capture traffic of ALL apps, core rejects non-whitelisted ones.
+        val firewall = store.firewallEnabled
+
+        // In firewall mode, ipv6 must also be captured, otherwise dual-stack apps
+        // could bypass the firewall via ipv6.
+        val allowIpv6 = store.allowIpv6 || firewall
+
         val device = with(Builder()) {
             // Interface address
             addAddress(TUN_GATEWAY, TUN_SUBNET_PREFIX)
-            if (store.allowIpv6) {
+            if (allowIpv6) {
                 addAddress(TUN_GATEWAY6, TUN_SUBNET_PREFIX6)
             }
 
@@ -135,7 +142,7 @@ class TunService : VpnService(), CoroutineScope by CoroutineScope(Dispatchers.De
                 resources.getStringArray(R.array.bypass_private_route).map(::parseCIDR).forEach {
                     addRoute(it.ip, it.prefix)
                 }
-                if (store.allowIpv6) {
+                if (allowIpv6) {
                     resources.getStringArray(R.array.bypass_private_route6).map(::parseCIDR).forEach {
                         addRoute(it.ip, it.prefix)
                     }
@@ -143,18 +150,20 @@ class TunService : VpnService(), CoroutineScope by CoroutineScope(Dispatchers.De
 
                 // Route of virtual DNS
                 addRoute(TUN_DNS, 32)
-                if (store.allowIpv6) {
+                if (allowIpv6) {
                     addRoute(TUN_DNS6, 128)
                 }
             } else {
                 addRoute(NET_ANY, 0)
-                if (store.allowIpv6) {
+                if (allowIpv6) {
                     addRoute(NET_ANY6, 0)
                 }
             }
 
             // Access Control
-            when (store.accessControlMode) {
+            // Firewall mode requires capturing every app's traffic for per-app filtering,
+            // so access control is skipped entirely.
+            if (!firewall) when (store.accessControlMode) {
                 AccessControlMode.AcceptAll -> Unit
                 AccessControlMode.AcceptSelected -> {
                     (store.accessControlPackages + packageName).forEach {
@@ -175,11 +184,11 @@ class TunService : VpnService(), CoroutineScope by CoroutineScope(Dispatchers.De
             setMtu(TUN_MTU)
 
             // Session Name
-            setSession("Clash")
+            setSession(if (firewall) "Hola Firewall" else "Clash")
 
             // Virtual Dns Server
             addDnsServer(TUN_DNS)
-            if (store.allowIpv6) {
+            if (allowIpv6) {
                 addDnsServer(TUN_DNS6)
             }
 
@@ -211,7 +220,8 @@ class TunService : VpnService(), CoroutineScope by CoroutineScope(Dispatchers.De
                 }
             }
 
-            if (store.allowBypass) {
+            // In firewall mode, disallow bypass to prevent apps escaping the VPN.
+            if (store.allowBypass && !firewall) {
                 allowBypass()
             }
 
@@ -219,9 +229,9 @@ class TunService : VpnService(), CoroutineScope by CoroutineScope(Dispatchers.De
                 fd = establish()?.detachFd()
                     ?: throw NullPointerException("Establish VPN rejected by system"),
                 stack = store.tunStackMode,
-                gateway = "$TUN_GATEWAY/$TUN_SUBNET_PREFIX" + if (store.allowIpv6) ",$TUN_GATEWAY6/$TUN_SUBNET_PREFIX6" else "",
-                portal = TUN_PORTAL + if (store.allowIpv6) ",$TUN_PORTAL6" else "",
-                dns = if (store.dnsHijacking) NET_ANY else (TUN_DNS + if (store.allowIpv6) ",$TUN_DNS6" else ""),
+                gateway = "$TUN_GATEWAY/$TUN_SUBNET_PREFIX" + if (allowIpv6) ",$TUN_GATEWAY6/$TUN_SUBNET_PREFIX6" else "",
+                portal = TUN_PORTAL + if (allowIpv6) ",$TUN_PORTAL6" else "",
+                dns = if (store.dnsHijacking) NET_ANY else (TUN_DNS + if (allowIpv6) ",$TUN_DNS6" else ""),
             )
         }
 
