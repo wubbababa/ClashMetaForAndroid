@@ -7,6 +7,7 @@ import org.yaml.snakeyaml.Yaml
 import java.io.File
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
+import java.util.UUID
 
 object FirewallProcessor {
     private const val KEY_RULES = "rules"
@@ -51,9 +52,8 @@ object FirewallProcessor {
 
         val yaml = Yaml(options)
 
-        @Suppress("UNCHECKED_CAST")
-        val data = configuration.inputStream().use {
-            yaml.load<Map<String, Any>>(it)
+        val data: MutableMap<String, Any> = configuration.inputStream().use {
+            yaml.load(it)
         } ?: throw IllegalStateException("Empty profile $CONFIGURATION_ID")
 
         val rules = buildList {
