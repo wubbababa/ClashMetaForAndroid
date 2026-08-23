@@ -57,3 +57,11 @@
     boolean getDEBUG() return false;
     boolean getRECOVER_STACK_TRACES() return false;
 }
+
+# SnakeYAML (firewall profile rewriting) references java.desktop/java.beans
+# introspection APIs that do not exist on Android. FirewallProcessor only loads
+# and dumps plain Maps/Lists/scalars, so these code paths are never executed.
+-dontwarn java.beans.**
+-dontwarn org.yaml.snakeyaml.**
+-keep class org.yaml.snakeyaml.** { *; }
+-keepclassmembers class org.yaml.snakeyaml.** { *; }
