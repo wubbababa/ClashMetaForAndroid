@@ -38,8 +38,8 @@ signing.properties
 # clion cmake build
 cmake-build-*
 
+# local.properties (allow custom.application.id to be committed)
 # local.properties
-local.properties
 
 
 # tracker
